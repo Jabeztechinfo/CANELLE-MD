@@ -1,144 +1,95 @@
-const fs = require('fs-extra')
-if (fs.existsSync('.env')) require('dotenv').config({ path: __dirname+'/.env' })
+const fs = require('fs-extra');
+const path = require('path');
 
+// Load .env if present
+if (fs.existsSync('.env')) {
+  require('dotenv').config({ path: path.join(__dirname, '.env') });
+}
 
-//═══════[Required Variables]════════\\
-global.audio= "" ;  
-global.video= "" ;
-global.port =process.env.PORT
-global.appUrl=process.env.APP_URL || ""                       // put your app url here,
-global.email ="osiemojabez@gmail.com"
-global.location="Nairobi,Kenya."
+// Utility: normalize booleans from environment variables
+const toBool = (x) => ['true', '1', 'yes'].includes(String(x).toLowerCase());
 
+const config = {
+  app: {
+    name: process.env.BOT_NAME || 'CANELLE-MD',
+    version: process.env.VERSION || '1.3.4',
+    caption: process.env.CAPTION || 'CANELLE-MD',
+    author: process.env.PACK_AUTHER || 'CANELLE',
+    packname: process.env.PACK_NAME || 'CANELLE',
+    ownerName: process.env.OWNER_NAME || 'It\'x Canelle',
+    owner: process.env.OWNER_NUMBER?.replace(/\s+/g, '') || '254103093350',
+    devs: process.env.DEVS || '923184474176',
+    menuStyle: process.env.MENU || '',
+    github: process.env.GITHUB || 'https://github.com/Jabeztechinfo/CANELLE-MD',
+    website: process.env.GURL || 'https://whatsapp.com/channel/',
+    email: 'osiemojabez@gmail.com',
+    location: 'Nairobi, Kenya.',
+  },
 
-global.mongodb= process.env.MONGODB_URI || ""
-global.allowJids= process.env.ALLOW_JID || "null" 
-global.blockJids= process.env.BLOCK_JID || "null"
-global.DATABASE_URL = process.env.DATABASE_URL || ""
+  server: {
+    port: process.env.PORT || 3000,
+    appUrl: process.env.APP_URL || '',
+    timezone: process.env.TZ || process.env.TIME_ZONE || 'Africa/Nairobi',
+  },
 
-global.timezone= process.env.TZ || process.env.TIME_ZONE || "Kenya/Nairobi";
-global.github=process.env.GITHUB|| "https://github.com/Jabeztechinfo/CANELLE-MD";
-global.gurl  =process.env.GURL  || "https://whatsapp.com/channel/";
-global.website=process.env.GURL || "https://whatsapp.com/channel/" ; 
-global.THUMB_IMAGE = process.env.THUMB_IMAGE || process.env.IMAGE || "https://github.com/Jabeztechinfo/CANELLE-MD/blob/main/lib/assets/canelle.jpg?raw=true" ; // SET LOGO FOR IMAGE 
+  session: {
+    sessionId: process.env.SESSION_ID || '',
+  },
 
+  db: {
+    url: process.env.DATABASE_URL || '',
+    mongo: process.env.MONGODB_URI || '',
+    isMongoEnabled: !!process.env.MONGODB_URI,
+    allowJids: process.env.ALLOW_JID?.split(',') || [],
+    blockJids: process.env.BLOCK_JID?.split(',') || [],
+  },
 
+  apis: {
+    removeBgKey: process.env.REMOVE_BG_KEY || '',
+    openAiKey: process.env.OPENAI_API_KEY || '',
+    elevenLabsKey: process.env.ELEVENLAB_API_KEY || '',
+    aittsVoiceId: process.env.AITTS_ID || '37',
+    koyebApi: process.env.KOYEB_API || '',
+    heroku: {
+      apiKey: process.env.HEROKU_API_KEY || '',
+      appName: process.env.HEROKU_APP_NAME || '',
+    },
+  },
 
-global.devs = "923184474176" // Developer Contact
-global.sudo = process.env.SUDO ? process.env.SUDO.replace(/[\s+]/g, '') : "null";
-global.owner= process.env.OWNER_NUMBER ? process.env.OWNER_NUMBER.replace(/[\s+]/g, '') : "254103093350";
+  flags: {
+    workType: process.env.WORKTYPE || process.env.MODE || 'private',
+    style: process.env.STYLE || '5',
+    flush: toBool(process.env.FLUSH),
+    welcome: toBool(process.env.WELCOME),
+    goodbye: toBool(process.env.GOODBYE),
+    disablePm: toBool(process.env.DISABLE_PM),
+    disableGroups: toBool(process.env.DISABLE_GROUPS),
+    msgsInLog: process.env.MSGS_IN_LOG || 'false',
+    readCmds: toBool(process.env.READ_COMMAND),
+    readMessage: toBool(process.env.READ_MESSAGE),
+    warnCount: parseInt(process.env.WARN_COUNT) || 3,
+    waPresence: process.env.WAPRESENCE || 'null',
+    alwaysOnline: process.env.WAPRESENCE || 'unavailable',
+  },
 
+  autoStatus: {
+    read: toBool(process.env.AUTO_READ_STATUS),
+    save: toBool(process.env.AUTO_SAVE_STATUS),
+    readFrom: (process.env.READ_STATUS_FROM || '').split(','),
+    saveFrom: (process.env.SAVE_STATUS_FROM || '').split(','),
+  },
 
+  media: {
+    thumbImage: process.env.THUMB_IMAGE || process.env.IMAGE || 'https://github.com/Jabeztechinfo/CANELLE-MD/blob/main/lib/assets/canelle.jpg?raw=true',
+    userImages: process.env.USER_IMAGES || 'text',
+  },
 
-
-//========================= [ BOT SETTINGS ] =========================\\
-global.style = process.env.STYLE   || '5'  // put '1' to "5" here to check bot styles
-global.flush = process.env.FLUSH   || "false"; // Make it "true" if bot not responed
-global.gdbye = process.env.GOODBYE || "false"; 
-global.wlcm  = process.env.WELCOME || "false";  // Make it "false" for disable WELCOME 
-
-global.warncount = process.env.WARN_COUNT || 3
-global.disablepm = process.env.DISABLE_PM || "false"
-global.disablegroup = process.env.DISABLE_GROUPS || "false", // disable bot in groups when public mode
-
-global.MsgsInLog = process.env.MSGS_IN_LOG|| "false" // "true"  to see messages , "log" to show logs , "false" to hide logs messages
-global.userImages= process.env.USER_IMAGES || "text" // set Image/video urls here
-global.waPresence= process.env.WAPRESENCE ||  "null" ; // 'unavailable' | 'available' | 'composing' | 'recording' | 'paused'
-
-
-//========================= [ AUTO READ MSGS & CMDS ] =========================\\
-global.readcmds = process.env.READ_COMMAND || "false"
-global.readmessage = process.env.READ_MESSAGE || "false"
-global.readmessagefrom = process.env.READ_MESSAGE_FROM || "null,923xxxxxxxx";
-
-
-//========================= [ AUTO SAVE & READ STATUS ] =========================\\
-global.read_status = process.env.AUTO_READ_STATUS || "false"
-global.save_status = process.env.AUTO_SAVE_STATUS || "false"
-global.save_status_from =  process.env.SAVE_STATUS_FROM  || "null,254xxxxxxxx";
-global.read_status_from =  process.env.READ_STATUS_FROM  ||  "254732647560,254103093350,254xxxxxxxx";
-
-global.api_smd = "" //  || "" // expires
-global.scan = "";
-
-
-global.SESSION_ID = process.env.SESSION_ID ||  ""  // PUT your SESSION_ID 
-
-
-module.exports = {
-
-  menu: process.env.MENU || "", /**  Available @MENU @Schemes 1: Aztec_Md, 2: A17_Md, 3: Suhail-Md Default ---------- If Not Choose then it Randomely Pic One Of Them Each time **/
-
-  HANDLERS: process.env.PREFIX  || ".",
-  BRANCH  : process.env.BRANCH  || "main",
-  VERSION : process.env.VERSION || "1.3.4",
-  caption : process.env.CAPTION || "CANELLE-MD" , // ```『 CANELLE-MD 』```", //*『 CANELLE』*\n youtube.com/@jabeztechinfo"),
- 
-  author : process.env.PACK_AUTHER|| "CANELLE",
-  packname: process.env.PACK_NAME || "CANELLE",
-  botname : process.env.BOT_NAME  || "CANELLE-MD",
-  ownername:process.env.OWNER_NAME|| "It'x Canelle",
-
-
-  errorChat : process.env.ERROR_CHAT || "",
-  KOYEB_API : process.env.KOYEB_API  || "false",
-
-  REMOVE_BG_KEY : process.env.REMOVE_BG_KEY  || "",
-  OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
-  HEROKU_API_KEY: process.env.HEROKU_API_KEY || "",
-  HEROKU_APP_NAME:process.env.HEROKU_APP_NAME|| "",
-  antilink_values:process.env.ANTILINK_VALUES|| "all",
-  HEROKU: process.env.HEROKU_APP_NAME && process.env.HEROKU_API_KEY,
-
-
-  WORKTYPE: process.env.WORKTYPE || process.env.MODE|| "private",
-  LANG: ( process.env.THEME ||  "CANELLE"  ).toUpperCase(),
-
-
-
+  errorChat: process.env.ERROR_CHAT || '',
+  prefix: process.env.PREFIX || '.',
+  branch: process.env.BRANCH || 'main',
+  language: (process.env.THEME || 'CANELLE').toUpperCase(),
+  antilinkValues: process.env.ANTILINK_VALUES || 'all',
+  readMessageFrom: (process.env.READ_MESSAGE_FROM || 'null').split(','),
 };
 
-
-
-global.ELEVENLAB_API_KEY = process.env.ELEVENLAB_API_KEY || "";
-global.aitts_Voice_Id = process.env.AITTS_ID|| "37";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-global.rank = "updated"
-global.isMongodb = false; 
-let file = require.resolve(__filename)
-fs.watchFile(file, () => { fs.unwatchFile(file);console.log(`Update'${__filename}'`);delete require.cache[file];	require(file); })
- 
-
-// ========================= [ Disables in V.1.2.8 ] ===============================\\  
-  //style : process.env.STYLE || "2",  // put '1' & "2" here to check bot styles
-  //readmessage:process.env.READ_MESSAGE|| "false",
-  //warncount: process.env.WARN_COUNT || 3,
-  //userImages:process.env.USER_IMAGES|| "text",  // SET IMAGE AND VIDEO URL FOR BOT MENUS 
-  //disablepm: process.env.DISABLE_PM || "false",
-  //MsgsInLog: process.env.MSGS_IN_LOG|| "false", // "true"  to see messages , "log" to open logs , "false" to hide logs messages
-  //readcmds:process.env.READ_COMMANDS|| "false", 
-  //alwaysonline:process.env.WAPRESENCE|| "unavailable", // 'unavailable' | 'online' | 'composing' | 'recording' | 'paused'
-  //read_status: process.env.AUTO_READ_STATUS || "false",
-  //save_status: process.env.AUTO_SAVE_STATUS || "false",
-  //aitts_Voice_Id : process.env.AITTS_ID || "37",
-  //ELEVENLAB_API_KEY: process.env.ELEVENLAB_API_KEY  || "",
+module.exports = config;
